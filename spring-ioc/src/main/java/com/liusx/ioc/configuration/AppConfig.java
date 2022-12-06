@@ -1,9 +1,9 @@
 package com.liusx.ioc.configuration;
 
-import com.liusx.ioc.annotation.DemoComponent;
-import jdk.internal.org.objectweb.asm.tree.analysis.Value;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 
-@ComponentScan(value = "com.liusx.ioc.service")
+@ComponentScan(value = "com.liusx.ioc")
+@EnableAspectJAutoProxy
 public class AppConfig {
 }

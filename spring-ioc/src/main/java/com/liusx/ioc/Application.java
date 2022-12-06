@@ -5,7 +5,6 @@ import com.liusx.ioc.configuration.AppConfig;
 import com.liusx.ioc.service.Members;
 import com.liusx.ioc.service.OrderService;
 import com.liusx.ioc.service.UserService;
-import com.liusx.ioc.xml.AnnotationApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -27,6 +26,10 @@ public class Application {
         annotationConfigApplicationContext.register(AppConfig.class);
         annotationConfigApplicationContext.refresh();
         System.out.println("spring Bean:" + annotationConfigApplicationContext.getBean(Members.class));
+
+        // AOP
+        UserService bean = annotationConfigApplicationContext.getBean(UserService.class);
+        System.out.println(bean.getUserName());
 
     }
 }
