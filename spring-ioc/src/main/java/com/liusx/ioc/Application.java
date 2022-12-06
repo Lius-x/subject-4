@@ -1,5 +1,6 @@
 package com.liusx.ioc;
 
+import com.liusx.ioc.aop.AopDemo;
 import com.liusx.ioc.configuration.AnnotationConfiguration;
 import com.liusx.ioc.configuration.AppConfig;
 import com.liusx.ioc.service.Members;
@@ -30,6 +31,10 @@ public class Application {
         // AOP
         UserService bean = annotationConfigApplicationContext.getBean(UserService.class);
         System.out.println(bean.getUserName());
+
+        // 自定义动态代理
+        AopDemo aopDemo = annotationConfigApplicationContext.getBean(AopDemo.class);
+        System.out.println(aopDemo.getName());
 
     }
 }
