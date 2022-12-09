@@ -131,6 +131,47 @@ public class ThreadCommunication {
         }
     }
 
+    /** 正常的park/unpark */
+    public void parkUnparkTest() throws Exception {
+        // 启动线程
+        Thread consumerThread = new Thread(() -> {
+            if (baozidian == null) { // 如果没包子，则进入等待
+                System.out.println("1、进入等待");
+                LockSupport.park();
+            }
+            System.out.println("2、买到包子，回家");
+        });
+        consumerThread.start();
+        // 3秒之后，生产一个包子
+        Thread.sleep(3000L);
+        baozidian = new Object();
+        LockSupport.unpark(consumerThread);
+        System.out.println("3、通知消费者");
+    }
+
+    /** 死锁的park/unpark */
+    public void parkUnparkDeadLockTest() throws Exception {
+        // 启动线程
+        Thread consumerThread = new Thread(() -> {
+            if (baozidian == null) { // 如果没包子，则进入等待
+                System.out.println("1、进入等待");
+                // 当前线程拿到锁，然后挂起
+                synchronized (this) {
+                    LockSupport.park();
+                }
+            }
+            System.out.println("2、买到包子，回家");
+        });
+        consumerThread.start();
+        // 3秒之后，生产一个包子
+        Thread.sleep(3000L);
+        baozidian = new Object();
+        // 争取到锁以后，再恢复consumerThread
+        synchronized (this) {
+            LockSupport.unpark(consumerThread);
+        }
+        System.out.println("3、通知消费者");
+    }
 
     public static void main(String[] args) throws Exception {
         // 对调用顺序有要求，也要开发自己注意锁的释放。这个被弃用的API， 容易死锁，也容易导致永久挂起。
@@ -141,6 +182,10 @@ public class ThreadCommunication {
         // wait/notify要求再同步关键字里面使用，免去了死锁的困扰，但是一定要先调用wait，再调用notify，否则永久等待了
         // new ThreadCommunication().waitNotifyTest();
          // new ThreadCommunication().waitNotifyDeadLockTest();
+
+        // wait/notify要求再同步关键字里面使用，免去了死锁的困扰，但是一定要先调用wait，再调用notify，否则永久等待了
+        // new ThreadCommunication().waitNotifyTest();
+         new ThreadCommunication().waitNotifyDeadLockTest();
 
     }
 
