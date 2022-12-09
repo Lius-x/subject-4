@@ -1,5 +1,7 @@
 package com.liusx.juc.threadcommunication;
 
+import java.util.concurrent.locks.LockSupport;
+
 /** 三种线程协作通信的方式：suspend/resume、wait/notify、park/unpack */
 public class ThreadCommunication {
 
@@ -74,11 +76,72 @@ public class ThreadCommunication {
     }
 
 
+    /** 正常的wait/notify */
+    public void waitNotifyTest() throws Exception {
+        // 启动线程
+        new Thread(() -> {
+            if (baozidian == null) { // 如果没包子，则进入等待
+                synchronized (this) {
+                    try {
+                        System.out.println("1、进入等待");
+                        this.wait();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            System.out.println("2、买到包子，回家");
+        }).start();
+        // 3秒之后，生产一个包子
+        Thread.sleep(3000L);
+        baozidian = new Object();
+        synchronized (this) {
+            this.notifyAll();
+            System.out.println("3、通知消费者");
+        }
+    }
+
+    /** 会导致程序永久等待的wait/notify */
+    public void waitNotifyDeadLockTest() throws Exception {
+        // 启动线程
+        new Thread(() -> {
+            if (baozidian == null) { // 如果没包子，则进入等待
+                try {
+                    Thread.sleep(5000L);
+                } catch (InterruptedException e1) {
+                    e1.printStackTrace();
+                }
+                synchronized (this) {
+                    try {
+                        System.out.println("1、进入等待");
+                        this.wait();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            System.out.println("2、买到包子，回家");
+        }).start();
+        // 3秒之后，生产一个包子
+        Thread.sleep(3000L);
+        baozidian = new Object();
+        synchronized (this) {
+            this.notifyAll();
+            System.out.println("3、通知消费者");
+        }
+    }
+
+
     public static void main(String[] args) throws Exception {
         // 对调用顺序有要求，也要开发自己注意锁的释放。这个被弃用的API， 容易死锁，也容易导致永久挂起。
          /*new ThreadCommunication().suspendResumeTest();
          new ThreadCommunication().suspendResumeDeadLockTest();
          new ThreadCommunication().suspendResumeDeadLockTest2();*/
+
+        // wait/notify要求再同步关键字里面使用，免去了死锁的困扰，但是一定要先调用wait，再调用notify，否则永久等待了
+        // new ThreadCommunication().waitNotifyTest();
+         // new ThreadCommunication().waitNotifyDeadLockTest();
+
     }
 
 }
